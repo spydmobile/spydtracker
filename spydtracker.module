@@ -217,7 +217,7 @@ if (isset($datestring1)&& isset($datestring1)) {
  * @param string $trackingcode
  *   This is the tracking code to use.
  */
-function spydtracker_check_cp($trackingcode) {
+function spydtracker_check_cp($trackingcode,$nid) {
   if (strtoupper($trackingcode) == 'NONE') {
     return;
   }
@@ -244,8 +244,12 @@ function spydtracker_check_cp($trackingcode) {
       if (strpos($notify_html, 'FORT SMITH' )>0) {
         $notify_html = '<h2>Item is in Fort Smith</h2>' . "\n" . $notify_html;
       }
-      if (strpos($notify_html, 'FORT SMITH' )>0) {
-        $notify_html = '<h2>Item is in Fort Smith</h2>' . "\n" . $notify_html;
+      if (strpos($notify_html, 'Item successfully delivered' )>0) {
+        $notify_html = '<h2>Item successfully delivered</h2>' . "\n" . $notify_html;
+        $node = node_load($nid);
+        $node->field_tracking_status[0]['value'] = 'Arrived'
+
+
       }
       $message = array(
         'to' => $accountmail,
