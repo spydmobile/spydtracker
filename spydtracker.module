@@ -293,6 +293,7 @@ function spydtracker_check_cp($trackingcode,$nid) {
 */
 function spydtracker_cron() {
   $expires = variable_get('spydtracker_cron_last_run', REQUEST_TIME);
+  watchdog("spydtracker","Cron Fired");
   $scan_results = spydtracker_scan_products(array('cp'));
   variable_set('spydtracker_cron_last_run', REQUEST_TIME);
 }
