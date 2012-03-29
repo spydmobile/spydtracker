@@ -240,7 +240,7 @@ function spydtracker_check_cp($trackingcode,$nid) {
         $node->field_tracking_status[0]['value'] = 'Arrived';
         node_save($node);
         //dpm($trackingcode . " Marked as arrived");
-        watchdog('spydtrack', $trackingcode . " Marked as arrived")
+        watchdog('spydtrack', $trackingcode . " Marked as arrived");
       }
       else {
         //dpm($trackingcode . " No change");
@@ -276,7 +276,7 @@ function spydtracker_check_cp($trackingcode,$nid) {
       $mailresult = drupal_mail_send($message);
       if (!$mailresult===FALSE) {
         //dpm($trackingcode . " changed, mail sent");
-        watchdog('spydtrack', $trackingcode . " changed, mail sent")
+        watchdog('spydtrack', $trackingcode . " changed, mail sent");
       }
       else {
         //dpm($trackingcode . " changed, mail failed");
