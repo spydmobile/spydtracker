@@ -7,7 +7,7 @@
 /**
  * This function tries to track the package and return the results
  */
-function spydtracker_track_cp($num) {
+function spydtracker_track_cp($num, $internal = FALSE) {
   $url = 'http://www.canadapost.ca/cpotools/apps/track/personal/findByTrackNumber?trackingNumber=';
   $usps_url = 'http://trkcnfrm1.smi.usps.com/PTSInternetWeb/InterLabelInquiry.do?origTrackNum=';
   $singapore_url = "http://www.speedpost.com.sg/TrackAndTrace.asp?itemnos=";
@@ -24,22 +24,19 @@ function spydtracker_track_cp($num) {
   $doc->loadHTML($str);
   if ($doc->getElementById($search)) {
     $divs[] = $doc->getElementById($search);
-    //dpm(var_dump($divs));
+    // dpm(var_dump($divs));
     if ( count($divs ) ) {
-                    foreach ( $divs as $div ) {
-
-                                                    $xml = $div->ownerDocument->saveXML($div);
-
-                                                    //$out=str_replace('width="100%"', 'width="620px"' ,$xml);
-                    //  $out=str_replace('class=""', 'class="views-table"' ,$xml);
-                                                    $out=_parseTable($xml);
-                                                    //dpm($xml);
-    //      dpm($out);
-                                                    //echo "<pre>". $div->nodeValue."</pre>";
-                                                    //echo "<pre>". print_r($out)."</pre>";
-                    } // end foreach
-
-    } //end if
+    foreach ( $divs as $div ) {
+      $xml = $div->ownerDocument->saveXML($div);
+      // $out=str_replace('width="100%"', 'width="620px"' ,$xml);
+      // $out=str_replace('class=""', 'class="views-table"' ,$xml);
+      $out=_parseTable($xml);
+      // dpm($xml);
+      //      dpm($out);
+      // echo "<pre>". $div->nodeValue."</pre>";
+      // echo "<pre>". print_r($out)."</pre>";
+      } // end foreach
+    } // end if
     libxml_use_internal_errors(FALSE);
 
 
@@ -113,7 +110,7 @@ dpm($out);
     $output .= "<li>Try <a href='".$tiawan_url.$num."' target='_blank'>EMS from Tiawan</a>";
     $output .= "<li>Or Try <a href='".$universal_url.$num."' target='_blank'>Universal tracker at trackthepack.com</a>";
   }
-  return $output;
+  return ($internal) ? $out : $output;
 } //end function
 
 
