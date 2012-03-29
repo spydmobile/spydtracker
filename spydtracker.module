@@ -295,7 +295,7 @@ function spydtracker_scan_products($agent){
         }
         foreach ($nidlist as $nid) {
           $node = node_load($nid);
-          if ($node->field_tracking_status[0]['value'] == 'Archived') {
+          if ($node->field_tracking_status[0]['value'] == 'Archived' ||$node->field_tracking_status[0]['value'] == 'Arrived' ) {
             if (!is_null($node->field_track_number[0]['value'])) {
               variable_del('spydtrack_'.$node->field_track_number[0]['value']);
             }
