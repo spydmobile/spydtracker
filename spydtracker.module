@@ -210,4 +210,77 @@ if (isset($datestring1)&& isset($datestring1)) {
 } //end function
 
 
+
+/**
+ * This function checks if there is a change to the package status and emails
+ * admin if there is. Should be called from hook_cron.
+ * @param string $trackingcode
+ *   This is the tracking code to use.
+ */
+function spydtracker_check_cp($trackingcode) {
+  // get data
+  $new_data = spydtracker_track_cp($trackingcode, TRUE);
+
+  // check for exisiting record
+  $old_data = variable_get('spydtrack_'.$trackingcode, FALSE);
+  if (!$old_data) {
+    // if we dont find an exisitng record, lets make one
+    variable_set('spydtrack_'.$trackingcode, $new_data);
+  }
+  else {
+    // else compare
+    if (!$old_data == $new_data) {
+      // there has been a change so lets create info for the mail
+      $notify_html = spydtracker_track_cp($trackingcode);
+      $message = array(
+        'to' => 'example@example.com',
+        'from' => 'another_example@example.com',
+        'subject' => t('Your Package Status has changed!'),
+        'body' => "<html><head></head><body>" . $notify_html . "</body></html>",
+        'headers' => array(
+          'From' => $from,
+          'MIME-Version' => '1.0',
+          'Content-Type' => 'text/html;charset=utf-8',),
+      );
+      drupal_mail_send($message);
+    }
+  }
+
+}
+
+
+
+/**
+* Implements hook_cron().
+*/
+function spydtracker_cron() {
+  $expires = variable_get('spydtracker_cron_last_run', REQUEST_TIME);
+  $scan_results = spydtracker_scan_products(array('cp'));
+  variable_set('spydtracker_cron_last_run', REQUEST_TIME);
+}
+
+function spydtracker_scan_products($agent){
+  foreach ($agent as $key => $value) {
+    switch ($value) {
+      case 'cp':
+         $nids = db_result(db_query("SELECT nid FROM {node} n WHERE type = 'partsorder'"));
+          dpm($nids);
+
+        $foo = 'Item successfully delivered';
+
+        break;
+
+
+    }
+
+
+  }
+
+
+
+
+
+}
+
+
 ?>
