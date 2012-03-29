@@ -233,8 +233,18 @@ function spydtracker_check_cp($trackingcode,$nid) {
 
     // else compare
     if ($old_data == $new_data) {
-      // same do nothing but
-      dpm($trackingcode . " No change");
+       $notify_html = spydtracker_track_cp($trackingcode);
+
+      if (strpos($notify_html, 'Item successfully delivered' )>0) {
+        $node = node_load($nid);
+        $node->field_tracking_status[0]['value'] = 'Arrived';
+        node_save($node);
+        dpm($trackingcode . " Marked as arrived");
+      }
+      else {
+        dpm($trackingcode . " No change");
+      }
+
     }
     else {
       dpm($old_data);
