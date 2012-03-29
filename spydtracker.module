@@ -228,17 +228,14 @@ function spydtracker_check_cp($trackingcode,$nid) {
 
   // check for exisiting record
   $old_data = variable_get('spydtrack_'.$trackingcode, FALSE);
-  if (!$old_data) {
-    // if we dont find an exisitng record, lets make one
-    variable_set('spydtrack_'.$trackingcode, $new_data);
-  }
-  else {
+
     // else compare
     if ($old_data == $new_data) {
       // same do nothing but
       dpm($trackingcode . " No change");
     }
     else {
+      variable_set('spydtrack_'.$trackingcode, $new_data);
       // there has been a change so lets create info for the mail
       $notify_html = spydtracker_track_cp($trackingcode);
       if (strpos($notify_html, 'FORT SMITH' )>0) {
@@ -247,7 +244,7 @@ function spydtracker_check_cp($trackingcode,$nid) {
       if (strpos($notify_html, 'Item successfully delivered' )>0) {
         $notify_html = '<h2>Item successfully delivered</h2>' . "\n" . $notify_html;
         $node = node_load($nid);
-        $node->field_tracking_status[0]['value'] = 'Arrived'
+        $node->field_tracking_status[0]['value'] = 'Arrived';
 
 
       }
@@ -270,8 +267,6 @@ function spydtracker_check_cp($trackingcode,$nid) {
       }
 
     }
-  }
-
 }
 
 
