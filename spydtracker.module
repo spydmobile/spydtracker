@@ -216,6 +216,8 @@ if (isset($datestring1)&& isset($datestring1)) {
  * admin if there is. Should be called from hook_cron.
  * @param string $trackingcode
  *   This is the tracking code to use.
+ * @param int $nid
+ *   This is node id of the node it came from.
  */
 function spydtracker_check_cp($trackingcode,$nid) {
   if (strtoupper($trackingcode) == 'NONE') {
@@ -235,6 +237,8 @@ function spydtracker_check_cp($trackingcode,$nid) {
       dpm($trackingcode . " No change");
     }
     else {
+      dpm($old_data);
+      dpm($new_data);
       variable_set('spydtrack_'.$trackingcode, $new_data);
       // there has been a change so lets create info for the mail
       $notify_html = spydtracker_track_cp($trackingcode);
@@ -251,7 +255,7 @@ function spydtracker_check_cp($trackingcode,$nid) {
       $message = array(
         'to' => $accountmail,
         'from' => $rootmail,
-        'subject' => t('Your Package Status has changed!'),
+        'subject' => '('. $trackingcode .') Your Package Status has changed!',
         'body' => "<html><head></head><body>" . $notify_html . "</body></html>",
         'headers' => array(
           'From' => $rootmail,
@@ -302,17 +306,17 @@ function spydtracker_scan_products($agent){
           else {
             $scan[$nid] = $node;
 
-            spydtracker_check_cp($node->field_track_number[0]['value']);
+            spydtracker_check_cp($node->field_track_number[0]['value'], $nid);
 
           }
         }
-        dpm("cleanup");
-        dpm($cleanup);
+       // dpm("cleanup");
+       // dpm($cleanup);
 
 
 
-        dpm("scan");
-        dpm($scan);
+       // dpm("scan");
+       // dpm($scan);
 
 
 
