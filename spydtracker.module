@@ -231,7 +231,11 @@ function spydtracker_check_cp($trackingcode) {
   }
   else {
     // else compare
-    if (!$old_data == $new_data) {
+    if ($old_data == $new_data) {
+      // same do nothing but
+      dpm($trackingcode . " No change");
+    }
+    else {
       // there has been a change so lets create info for the mail
       $notify_html = spydtracker_track_cp($trackingcode);
       $message = array(
