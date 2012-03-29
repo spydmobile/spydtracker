@@ -268,7 +268,21 @@ function spydtracker_scan_products($agent){
         while ($row = db_fetch_object($nids)) {
           $nidlist[] = $row->nid;
         }
+        foreach ($nidlist as $nid) {
+          $node = node_load($nid);
+          if ($node->field_tracking_status[0]['value'] == 'Archived') {
+            $cleanup[$nid]=$node;
+          }
+          else {
+            $scan[$nid] = $node;
+          }
+        }
+        dpm("$cleanup");
         dpm($nidlist);
+        dpm("scan");
+        dpm($scan);
+
+
         $foo = 'Item successfully delivered';
         break;
     }
