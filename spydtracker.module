@@ -264,7 +264,7 @@ function spydtracker_scan_products($agent){
     switch ($value) {
       case 'cp':
         $nids = db_result(db_query("SELECT nid FROM {node} n WHERE type = 'partsorder'"));
-        foreach ($nids as $nid) {
+        foreach ($nids as $col => $nid) {
           $nidlist[] = $nid;
         }
 
