@@ -218,6 +218,9 @@ if (isset($datestring1)&& isset($datestring1)) {
  *   This is the tracking code to use.
  */
 function spydtracker_check_cp($trackingcode) {
+  if (strtoupper($trackingcode) == 'NONE') {
+    return;
+  }
   // get data
   $rootmail = user_load('1')->mail;
   $accountmail = user_load('3')->mail;
@@ -238,6 +241,12 @@ function spydtracker_check_cp($trackingcode) {
     else {
       // there has been a change so lets create info for the mail
       $notify_html = spydtracker_track_cp($trackingcode);
+      if (strpos($notify_html, 'FORT SMITH' )>0) {
+        $notify_html = '<h2>Item is in Fort Smith</h2>' . "\n" . $notify_html;
+      }
+      if (strpos($notify_html, 'FORT SMITH' )>0) {
+        $notify_html = '<h2>Item is in Fort Smith</h2>' . "\n" . $notify_html;
+      }
       $message = array(
         'to' => $accountmail,
         'from' => $rootmail,
@@ -248,7 +257,14 @@ function spydtracker_check_cp($trackingcode) {
           'MIME-Version' => '1.0',
           'Content-Type' => 'text/html;charset=utf-8',),
       );
-      drupal_mail_send($message);
+      $mailresult = drupal_mail_send($message);
+      if (!$mailresult===FALSE) {
+        dpm($trackingcode . " changed, mail sent");
+      }
+      else {
+        dpm($trackingcode . " changed, mail failed");
+      }
+
     }
   }
 
