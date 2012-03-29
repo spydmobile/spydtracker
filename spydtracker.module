@@ -249,7 +249,7 @@ function spydtracker_check_cp($trackingcode,$nid) {
         $notify_html = '<h2>Item successfully delivered</h2>' . "\n" . $notify_html;
         $node = node_load($nid);
         $node->field_tracking_status[0]['value'] = 'Arrived';
-
+        node_save($node);
 
       }
       $message = array(
