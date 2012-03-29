@@ -264,28 +264,15 @@ function spydtracker_scan_products($agent){
     switch ($value) {
       case 'cp':
         $nids=TRUE;
-        while ($nids) {
         $nids = db_result(db_query("SELECT nid FROM {node} n WHERE type = 'partsorder'"));
-
-          $nidlist[] = $nids->nid;
+        while ($row = db_fetch_object($result)) {
+          $nidlist[] = $row->nid;
         }
-
-          dpm($nidlist);
-
+        dpm($nidlist);
         $foo = 'Item successfully delivered';
-
         break;
-
-
     }
-
-
   }
-
-
-
-
-
 }
 
 
