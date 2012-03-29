@@ -219,6 +219,8 @@ if (isset($datestring1)&& isset($datestring1)) {
  */
 function spydtracker_check_cp($trackingcode) {
   // get data
+  $rootmail = user_load('1')->mail;
+  $accountmail = user_load('3')->mail;
   $new_data = spydtracker_track_cp($trackingcode, TRUE);
 
   // check for exisiting record
@@ -233,12 +235,12 @@ function spydtracker_check_cp($trackingcode) {
       // there has been a change so lets create info for the mail
       $notify_html = spydtracker_track_cp($trackingcode);
       $message = array(
-        'to' => 'example@example.com',
-        'from' => 'another_example@example.com',
+        'to' => $accountmail,
+        'from' => $rootmail,
         'subject' => t('Your Package Status has changed!'),
         'body' => "<html><head></head><body>" . $notify_html . "</body></html>",
         'headers' => array(
-          'From' => $from,
+          'From' => $rootmail,
           'MIME-Version' => '1.0',
           'Content-Type' => 'text/html;charset=utf-8',),
       );
@@ -271,19 +273,30 @@ function spydtracker_scan_products($agent){
         foreach ($nidlist as $nid) {
           $node = node_load($nid);
           if ($node->field_tracking_status[0]['value'] == 'Archived') {
+            if (!is_null($node->field_track_number[0]['value'])) {
+              variable_del('spydtrack_'.$node->field_track_number[0]['value']);
+            }
+
             $cleanup[$nid]=$node;
+
           }
           else {
             $scan[$nid] = $node;
+
+            spydtracker_check_cp($node->field_track_number[0]['value']);
+
           }
         }
         dpm("cleanup");
         dpm($cleanup);
+
+
+
         dpm("scan");
         dpm($scan);
 
 
-        $foo = 'Item successfully delivered';
+
         break;
     }
   }
