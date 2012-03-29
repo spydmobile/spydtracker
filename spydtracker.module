@@ -40,7 +40,7 @@ function spydtracker_track_cp($num, $internal = FALSE) {
     libxml_use_internal_errors(FALSE);
 
 
-dpm($out);
+    // dpm($out);
     // now lets put the data back in an HTML table
     $output = "More Info at <a href='".$url.$num."' target='_blank'>Canada post</a><br/>";
 
