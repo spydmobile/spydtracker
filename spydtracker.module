@@ -1,125 +1,119 @@
 <?php
 /**
- * Implementation of Spydtracker
+ * @file
+ * Module file for the spydtracker module.
  */
 
-// Nov 28 2011 - Added support for external tracking in china, hongkong, singapore, tiawan, and universal tracking at http://trackthepack.com/track/
-
-
-
+/**
+ * This function tries to track the package and return the results
+ */
 function spydtracker_track_cp($num) {
-$url='http://www.canadapost.ca/cpotools/apps/track/personal/findByTrackNumber?trackingNumber=';
-$usps_url='http://trkcnfrm1.smi.usps.com/PTSInternetWeb/InterLabelInquiry.do?origTrackNum=';
-$singapore_url="http://www.speedpost.com.sg/TrackAndTrace.asp?itemnos=";
-$china_url="http://www.ems.com.cn/qcgzOutQueryNewAction.do?reqCode=gotoSearchE&mailNum=";
-$tiawan_url="http://postserv.post.gov.tw/webpost/CSController?cmd=POS4005_1&mailno=";
-$universal_url = "http://trackthepack.com/track/";
-//$hongkong_url="http://app3.hongkongpost.com/CGI/mt/enquiry.jsp?itemno=";
-$hongkong_url="http://app3.hongkongpost.com/CGI/mt/e_detail.jsp?mail_type=ems_out&tracknbr=".$num."&localno=";
+  $url = 'http://www.canadapost.ca/cpotools/apps/track/personal/findByTrackNumber?trackingNumber=';
+  $usps_url = 'http://trkcnfrm1.smi.usps.com/PTSInternetWeb/InterLabelInquiry.do?origTrackNum=';
+  $singapore_url = "http://www.speedpost.com.sg/TrackAndTrace.asp?itemnos=";
+  $china_url = "http://www.ems.com.cn/qcgzOutQueryNewAction.do?reqCode=gotoSearchE&mailNum=";
+  $tiawan_url = "http://postserv.post.gov.tw/webpost/CSController?cmd=POS4005_1&mailno=";
+  $universal_url = "http://trackthepack.com/track/";
+  $hongkong_url = "http://app3.hongkongpost.com/CGI/mt/e_detail.jsp?mail_type=ems_out&tracknbr=" . $num . "&localno=";
+  $num = trim($num);
+  $str = file_get_contents($url . $num);
+  $search = "results";
+  $search = "tapListResultForm:table_2";
+  libxml_use_internal_errors(TRUE);
+  $doc = new DOMDocument();
+  $doc->loadHTML($str);
+  if ($doc->getElementById($search)) {
+    $divs[] = $doc->getElementById($search);
+    //dpm(var_dump($divs));
+    if ( count($divs ) ) {
+                    foreach ( $divs as $div ) {
 
-$num=trim($num);
-$str = file_get_contents($url.$num);
+                                                    $xml = $div->ownerDocument->saveXML($div);
 
-$search="results";
-$search="tapListResultForm:table_2";
-libxml_use_internal_errors(true);
-$doc = new DOMDocument();
-$doc->loadHTML($str);
-if ($doc->getElementById($search)) {
+                                                    //$out=str_replace('width="100%"', 'width="620px"' ,$xml);
+                    //  $out=str_replace('class=""', 'class="views-table"' ,$xml);
+                                                    $out=_parseTable($xml);
+                                                    //dpm($xml);
+    //      dpm($out);
+                                                    //echo "<pre>". $div->nodeValue."</pre>";
+                                                    //echo "<pre>". print_r($out)."</pre>";
+                    } // end foreach
 
-$divs[] = $doc->getElementById($search);
-
-//dpm(var_dump($divs));
-if ( count($divs ) ) {
-    foreach ( $divs as $div ) {
-      
-      $xml = $div->ownerDocument->saveXML($div);
-      
-      //$out=str_replace('width="100%"', 'width="620px"' ,$xml);
-    //  $out=str_replace('class=""', 'class="views-table"' ,$xml);
-      $out=_parseTable($xml);
-      //dpm($xml);
-//      dpm($out);
-      //echo "<pre>". $div->nodeValue."</pre>";
-      //echo "<pre>". print_r($out)."</pre>";
-    } // end foreach
-
-} //end if
-libxml_use_internal_errors(false); 
+    } //end if
+    libxml_use_internal_errors(FALSE);
 
 
-// now lets put the data back in an HTML table
-$output = "More Info at <a href='".$url.$num."' target='_blank'>Canada post</a><br/>";
+dpm($out);
+    // now lets put the data back in an HTML table
+    $output = "More Info at <a href='".$url.$num."' target='_blank'>Canada post</a><br/>";
 
 
-$output .= date('l jS \of F Y h:i:s A')."<table width='100%'><thead><tr>\n";
+    $output .= date('l jS \of F Y h:i:s A')."<table width='100%'><thead><tr>\n";
 
-foreach ($out as $mainkey=>$eventarray) {
+    foreach ($out as $mainkey=>$eventarray) {
 
-$headers = array_keys ($eventarray);
-$eventvaluesp[] = array_values ($eventarray);
-} //end foreach
+    $headers = array_keys ($eventarray);
+    $eventvaluesp[] = array_values ($eventarray);
+    } //end foreach
 
-// lets add headers:
+    // lets add headers:
 
 
-// first defaults:
+    // first defaults:
 
-$output .= "<th>";
-$output .= "<b>Tracking #</b>";
-$output .= "</th>\n";
+    $output .= "<th>";
+    $output .= "<b>Tracking #</b>";
+    $output .= "</th>\n";
 
 
 
-foreach ($headers as $key=>$value) {
-$output .= "<th>";
-$output .= "<b>".$value. "</b>";
-$output .= "</th>\n";
-} //end forech
-$output .= "</tr></thead>\n";
+    foreach ($headers as $key=>$value) {
+    $output .= "<th>";
+    $output .= "<b>".$value. "</b>";
+    $output .= "</th>\n";
+    } //end forech
+    $output .= "</tr></thead>\n";
 
-//now each row of data 
+    //now each row of data
 
-foreach ($eventvaluesp as $key=>$valuearray) {
-$output .= "<tr>";
+    foreach ($eventvaluesp as $key=>$valuearray) {
+    $output .= "<tr>";
 
-		$output .= "<td>";
-		$output .= "<b><a href='".$url.$num."' target='_blank'>".$num. "</a></b>";
-		$output .= "</td>\n";
-
-
-	foreach ($valuearray as $key=>$data) {
-		$output .= "<td>";
-		$output .= $data ;
-		$output .= "</td>\n";
-	} //end foreach
-$output .= "</tr>\n";
-} //end forech
-
-$output .= "</table>\n";
-$output .= "Something not right?<br/>";
-$output .= "<li>Try <a href='".$usps_url.$num."' target='_blank'>USPS</a>";
-$output .= "<li>Try <a href='".$china_url.$num."' target='_blank'>EMS from china</a>";
-$output .= "<li>Try <a href='".$hongkong_url.$num."' target='_blank'>EMS from HongKong</a>";
-$output .= "<li>Try <a href='".$singapore_url.$num."' target='_blank'>EMS from Singapore</a>";
-$output .= "<li>Try <a href='".$tiawan_url.$num."' target='_blank'>EMS from Tiawan</a>";
-$output .= "<li>Or Try <a href='".$universal_url.$num."' target='_blank'>Universal tracker at trackthepack.com</a>";
+                    $output .= "<td>";
+                    $output .= "<b><a href='".$url.$num."' target='_blank'>".$num. "</a></b>";
+                    $output .= "</td>\n";
 
 
+    foreach ($valuearray as $key=>$data) {
+                    $output .= "<td>";
+                    $output .= $data ;
+                    $output .= "</td>\n";
+    } //end foreach
+    $output .= "</tr>\n";
+    } //end forech
 
-} //end main if
-else {
+    $output .= "</table>\n";
+    $output .= "Something not right?<br/>";
+    $output .= "<li>Try <a href='".$usps_url.$num."' target='_blank'>USPS</a>";
+    $output .= "<li>Try <a href='".$china_url.$num."' target='_blank'>EMS from china</a>";
+    $output .= "<li>Try <a href='".$hongkong_url.$num."' target='_blank'>EMS from HongKong</a>";
+    $output .= "<li>Try <a href='".$singapore_url.$num."' target='_blank'>EMS from Singapore</a>";
+    $output .= "<li>Try <a href='".$tiawan_url.$num."' target='_blank'>EMS from Tiawan</a>";
+    $output .= "<li>Or Try <a href='".$universal_url.$num."' target='_blank'>Universal tracker at trackthepack.com</a>";
 
-$output = "No Data available at Canada Post<br/>";
-$output .= "<li>Try <a href='".$usps_url.$num."' target='_blank'>USPS</a>";
-$output .= "<li>Try <a href='".$china_url.$num."' target='_blank'>EMS from china</a>";
-$output .= "<li>Try <a href='".$hongkong_url.$num."' target='_blank'>EMS from HongKong</a>";
-$output .= "<li>Try <a href='".$singapore_url.$num."' target='_blank'>EMS from Singapore</a>";
-$output .= "<li>Try <a href='".$tiawan_url.$num."' target='_blank'>EMS from Tiawan</a>";
-$output .= "<li>Or Try <a href='".$universal_url.$num."' target='_blank'>Universal tracker at trackthepack.com</a>";
 
-}
-return $output;
+
+    } //end main if
+  else {
+    $output = "No Data available at Canada Post<br/>";
+    $output .= "<li>Try <a href='".$usps_url.$num."' target='_blank'>USPS</a>";
+    $output .= "<li>Try <a href='".$china_url.$num."' target='_blank'>EMS from china</a>";
+    $output .= "<li>Try <a href='".$hongkong_url.$num."' target='_blank'>EMS from HongKong</a>";
+    $output .= "<li>Try <a href='".$singapore_url.$num."' target='_blank'>EMS from Singapore</a>";
+    $output .= "<li>Try <a href='".$tiawan_url.$num."' target='_blank'>EMS from Tiawan</a>";
+    $output .= "<li>Or Try <a href='".$universal_url.$num."' target='_blank'>Universal tracker at trackthepack.com</a>";
+  }
+  return $output;
 } //end function
 
 
@@ -129,39 +123,39 @@ function _parseTable($html) {
   // Find the table
 
  preg_match("/<table.*?>.*?<\/[\s]*table>/s", $html, $table_html);
-/*  
+/*
  preg_match("/(.*)/s", $html, $table_html);
  */
- 
+
   // Get title for each row
   /*
   preg_match_all('/(.*?)/s',$table_html[0],$matches);
-  
+
   */
   //dpm($table_html);
-  
+
   $table_html[0]=str_replace('<thead>', '' ,$table_html[0]);
   $table_html[0]=str_replace('</thead>', '' ,$table_html[0]);
-   
-  
-  
+
+
+
    /* preg_match_all("/<th.*?>(.*?)<\/[\s]*th>/", $table_html[0], $matches); */
    preg_match_all("/<th.*?>(.*?)<\/[\s]*th>/s", $table_html[0], $matches);
   $row_headers = $matches[1];
    foreach (  $row_headers as $key=>$value) {
-   
-	$new_headers[]=strip_tags(html_entity_decode($value));
-    
+
+        $new_headers[]=strip_tags(html_entity_decode($value));
+
    } //end foreach
-    
+
    $row_headers  = $new_headers;
    //dpm($row_headers);
  //dpm($matches);
   // Iterate each row
   preg_match_all("/<tr.*?>(.*?)<\/[\s]*tr>/s", $table_html[0], $matches);
- 
+
   $table = array();
- 
+
   foreach($matches[1] as $row_html)
   {
     preg_match_all("/<td.*?>(.*?)<\/[\s]*td>/", $row_html, $td_matches);
@@ -172,7 +166,7 @@ function _parseTable($html) {
   //    dpm($td);
       $row[$row_headers[$i]] = $td;
     }
- 
+
     if(count($row) > 0)
       $table[] = $row;
   }
@@ -186,28 +180,28 @@ if (isset($datestring1)&& isset($datestring1)) {
 
     $datetime1 = new DateTime($datestring1);
     $datetime2 = new DateTime($datestring2);
-    
+
     $days1=$datetime1->format('z');
     $days2=$datetime2->format('z');
    // dpm($days1);
    // dpm($days2);
-    
-    
+
+
     $interval = $days1-$days2;
     if ($return) {
-	return $interval;
+        return $interval;
     }// end if
     else {
-	echo $interval;
+        echo $interval;
     }
-    
+
 }
     else {
        if ($return) {
-	return NULL;
+        return NULL;
     }// end if
     else {
-	echo "No Data";
+        echo "No Data";
     }
     }
 
