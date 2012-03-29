@@ -277,8 +277,8 @@ function spydtracker_scan_products($agent){
             $scan[$nid] = $node;
           }
         }
-        dpm("$cleanup");
-        dpm($nidlist);
+        dpm("cleanup");
+        dpm($cleanup);
         dpm("scan");
         dpm($scan);
 
