@@ -1,5 +1,0 @@
-; $Id$
-name = Spyd Package Tracking tools
-description = "allows drupal to track parcels"
-package = SpyD Tools
-core = 6.x
